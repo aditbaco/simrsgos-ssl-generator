@@ -1,6 +1,6 @@
-# SIMRSGOS SSL Certificate Generator
+# SIMGOS SSL Certificate Generator
 ## Overview
-This script can auto-generate a local trusted certificate for SIMRSGOS V2+ Apache based HTTPS server
+This script can auto-generate a local trusted certificate for SIMGOS V2+ Apache based HTTPS server
 
 ## Requirements
 * Root priviledges
@@ -20,4 +20,4 @@ This script can auto-generate a local trusted certificate for SIMRSGOS V2+ Apach
 * Enjoy!
 
 ## References
-https://docs.simrsgosv2.simpel.web.id/docs/konfigurasi/keamanan/
+https://docs.simgos2.simpel.web.id/docs/konfigurasi/keamanan/
