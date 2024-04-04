@@ -1,8 +1,8 @@
 #!/bin/sh
 
 ###################################################################
-#Script Name	: SSL Generator for SIMRSGOS V2+
-#Description	: create SSL for simrsgos server
+#Script Name	: SSL Generator for SIMGOS V2+
+#Description	: create SSL for simgos server
 #Args           : config/install
 ###################################################################
 ############## LENGKAPI DATA DIBAWAH INI ####################
@@ -13,8 +13,8 @@ INSTALASIRS=""
 EMAIL=""
 
 ######### JANGAN MENGUBAH APAPUN DIBAWAH BARIS IN I##########
-INSTALLDIR='/home/simrsgos'
-HOSTNAME='simrsgosv2'
+INSTALLDIR='/home/simgos'
+HOSTNAME='simgos2'
 MYIP=$(ip route get 1 | awk '{print $NF;exit}')
 DT=$(date +"%d%m%y")
 RED="31"
@@ -38,7 +38,7 @@ DEF=${1:-novalue}
 
 banner() {
     if [ -f "$(which figlet)" ]; then
-        figlet -ckf standard "SIMRSGOS V2+ SSL Install"
+        figlet -ckf standard "SIMGOS V2+ SSL Install"
     else
         time yum -y -q install figlet
         banner
@@ -101,7 +101,7 @@ certconfig() {
     double_check_data
     if [[ ! -f "${INSTALLDIR}/certs" ]]; then
         echo "$(date) : creating required directory..."
-        mkdir -p /home/simrsgos/certs
+        mkdir -p /home/simgos/certs
         cd "${INSTALLDIR}/certs"
         echo "$(date) : creating configuration file..."
             if [[ "$(/usr/bin/cat /etc/httpd/conf/httpd.conf | grep '#ServerName www.example.com:80' >/dev/null 2>&1; echo $?)" != '0' ]]; then
@@ -110,11 +110,11 @@ certconfig() {
                 echo -e "$(date) : ${BOLDGREEN}${HOSTNAME}${ENDCOLOR}"
             else
                 echo "$(date) : changing default hostname to:"
-                sed -i 's/#ServerName www.example.com:80/ServerName simrsgosv2/g' /etc/httpd/conf/httpd.conf
-                HOSTNAME='simrsgosv2'
+                sed -i 's/#ServerName www.example.com:80/ServerName simgos2/g' /etc/httpd/conf/httpd.conf
+                HOSTNAME='simgos2'
                 echo -e "$(date) : ${BOLDGREEN}${HOSTNAME}${ENDCOLOR}"
             fi
-cat > "/home/simrsgos/certs/config.cnf" <<EOF
+cat > "/home/simgos/certs/config.cnf" <<EOF
 [req]
 distinguished_name = dn
 x509_extensions = v3_req
@@ -127,7 +127,7 @@ L = $KOTA
 O = $KODENAMARS
 OU = $INSTALASIRS
 emailAddress = $EMAIL
-CN = SIMRSGos V.2+
+CN = SIMGos V.2+
 
 [v3_req]
 subjectAltName = @alt_names
@@ -158,13 +158,13 @@ certinstall () {
     double_check_packages
     if [ -f /usr/bin/openssl ]; then
         echo "$(date) : generating new certificate, this might take a while..."
-        openssl req -new -x509 -newkey rsa:2048 -sha256 -nodes -keyout /home/simrsgos/certs/server.key -days 3650 -out /home/simrsgos/certs/server.crt -config /home/simrsgos/certs/config.cnf
+        openssl req -new -x509 -newkey rsa:2048 -sha256 -nodes -keyout /home/simgos/certs/server.key -days 3650 -out /home/simgos/certs/server.crt -config /home/simgos/certs/config.cnf
 
         echo -e "$(date) : ${BOLDGREEN}setting up your new cert file & key...${ENDCOLOR}"
-        sed -i "s/^SSLCertificateFile \/etc\/pki\/tls\/certs\/\(.*\).crt$/SSLCertificateFile \/home\/simrsgos\/certs\/server.crt/g" /etc/httpd/conf.d/ssl.conf
-        sed -i "s/^SSLCertificateKeyFile \/etc\/pki\/tls\/private\/\(.*\).key$/SSLCertificateKeyFile \/home\/simrsgos\/certs\/server.key/g" /etc/httpd/conf.d/ssl.conf
+        sed -i "s/^SSLCertificateFile \/etc\/pki\/tls\/certs\/\(.*\).crt$/SSLCertificateFile \/home\/simgos\/certs\/server.crt/g" /etc/httpd/conf.d/ssl.conf
+        sed -i "s/^SSLCertificateKeyFile \/etc\/pki\/tls\/private\/\(.*\).key$/SSLCertificateKeyFile \/home\/simgos\/certs\/server.key/g" /etc/httpd/conf.d/ssl.conf
         echo -e "$(date) : ${BOLDGREEN}success! restarting your services...${ENDCOLOR}"
-        chown -R simrsgos:simrsgos /home/simrsgos/
+        chown -R simgos:simgos /home/simgos/
         firewall-cmd --permanent --add-service=https
         echo
         echo "systemctl daemon-reload; service httpd restart; systemctl restart php-fpm; echo \"Restarting apache & php-fpm (via systemctl) [  OK  ]\"" >/usr/bin/hprestart ; chmod 700 /usr/bin/hprestart
@@ -190,7 +190,7 @@ certinstall () {
                 echo -e "$(date) : ${BOLDGREEN}Successfully restarting services...${ENDCOLOR}"
                 echo
                 echo "$(date) : --------------------------------------------------------"
-                echo "$(date) : Thankyou for using SIMRSGOS V2+ SSL Installer!"
+                echo "$(date) : Thankyou for using SIMGOS V2+ SSL Installer!"
                 echo "$(date) : --------------------------------------------------------"
                 echo "$(date) : Install Summary Logs: ${INSTALLDIR}/ssl_install_${DT}.log"
                 echo "$(date) : --------------------------------------------------------"
@@ -200,7 +200,7 @@ certinstall () {
 }
 
 info () {
-    echo -e "$(date) : ${BOLDRED}Generate Self Sign Certificate for SSL SIMRSGOS V2+${ENDCOLOR}"
+    echo -e "$(date) : ${BOLDRED}Generate Self Sign Certificate for SSL SIMGOS V2+${ENDCOLOR}"
     echo -e "$(date) : ${BOLDRED}# Step 1${ENDCOLOR}"
     echo -e "$(date) : # Edit config variables"
     echo -e "$(date) : ${BOLDGREEN}open this script using nano and change field value at the top of this script${ENDCOLOR}"
