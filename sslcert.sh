@@ -24,6 +24,12 @@ BOLDGREEN="\e[1;${GREEN}m"
 ENDCOLOR="\e[0m"
 ###########################################################
 
+CENTOSVER=$(awk '{ print $3 }' /etc/redhat-release | cut -d . -f1)
+
+if [ "$CENTOSVER" == 'release' ]; then
+    CENTOSVER=$(awk '{ print $4 }' /etc/redhat-release | cut -d . -f1)
+fi
+
 if [ "$(id -u)" != 0 ]; then
   echo "$(date) : script needs to be run as root user" >&2
   if [ "$(id -Gn | grep -o wheel)" ]; then
@@ -75,7 +81,11 @@ double_check_packages() {
     fi
     if [ ! -f /usr/bin/openssl ]; then
         echo "$(date) : openssl not found. installing..."
-        time yum -y -q install openssl mod_ssl
+        time yum -y -q install openssl
+    fi
+    if [[ -z "$(rpm -qa | grep mod_ssl)" ]]; then
+        echo "$(date) : mod_ssl not found. installing..."
+        time yum -y -q install mod_ssl
     fi
     if [ ! -f /usr/bin/nano ]; then
         echo "$(date) : nano not found. installing..."
@@ -88,7 +98,7 @@ double_check_packages() {
 } 
 
 certconfig() {
-    if [[ ! -f /usr/bin/wget || ! -f /usr/bin/openssl ]]; then       
+    if [[ ! -f /usr/bin/wget || ! -f /usr/bin/openssl || -z "$(rpm -qa | grep mod_ssl)" ]]; then       
         echo "$(date) : please wait, checking required packages..."
         double_check_packages
         echo
@@ -116,26 +126,28 @@ certconfig() {
             fi
 cat > "/home/simgos/certs/config.cnf" <<EOF
 [req]
-distinguished_name = dn
-x509_extensions = v3_req
+distinguished_name = req_distinguished_name
+x509_extensions = v3_ca
 prompt = no
 
-[dn]
-C = ID
-ST = $PROVINSI
-L = $KOTA
-O = $KODENAMARS
-OU = $INSTALASIRS
+[ req_distinguished_name ]
+countryName = ID
+stateOrProvinceName = $PROVINSI
+localityName = $KOTA
+0.organizationName = $KODENAMARS
+organizationalUnitName = $INSTALASIRS
+commonName = $HOSTNAME
 emailAddress = $EMAIL
-CN = SIMGos V.2+
+
+[ v3_ca ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer
+basicConstraints = critical,CA:true
 
 [v3_req]
-subjectAltName = @alt_names
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
-[alt_names]
-DNS.1 = $HOSTNAME
-DNS.2 = localhost
-IP.1 = $MYIP
 EOF
         echo
         echo "$(date) : --------------------------------------------------------"
