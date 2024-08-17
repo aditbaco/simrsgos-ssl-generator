@@ -124,6 +124,8 @@ certconfig() {
                 HOSTNAME='simgos2'
                 echo -e "$(date) : ${BOLDGREEN}${HOSTNAME}${ENDCOLOR}"
             fi
+            if [[ "$CENTOSVER" -eq '8' || "$CENTOSVER" -eq '9' ]]; then
+            echo "$(date) : using config for Rhel 8/9..."
 cat > "/home/simgos/certs/config.cnf" <<EOF
 [req]
 distinguished_name = req_distinguished_name
@@ -149,6 +151,33 @@ basicConstraints = CA:FALSE
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
 EOF
+        elif [[ "$CENTOSVER" -eq '7' ]]; then
+        echo "$(date) : using config for Rhel 7..."
+cat > "/home/simgos/certs/config.cnf" <<EOF
+[req]
+distinguished_name = dn
+x509_extensions = v3_req
+prompt = no
+
+[dn]
+C = ID
+ST = $PROVINSI
+L = $KOTA
+O = $KODENAMARS
+OU = $INSTALASIRS
+CN = $HOSTNAME
+emailAddress = $EMAIL
+
+[v3_req]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = $HOSTNAME
+DNS.2 = localhost
+IP.1 = $MYIP
+
+EOF
+        fi
         echo
         echo "$(date) : --------------------------------------------------------"
         echo "$(date) : config file has been created. your SSL configuration file:"
